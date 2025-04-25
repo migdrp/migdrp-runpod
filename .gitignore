@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*build*/
+*dist*/
+*.egg-info/
+*.egg
+venv/
+.venv/
+
+# Jupyter
+.ipynb_checkpoints
+
+# Workspace specific (FluxGym generated)
+/workspace/fluxgym/venv/
+/workspace/fluxgym/outputs/
+/workspace/fluxgym/logs/
+/workspace/models/
+/workspace/datasets/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Secrets (should be passed via env vars)
+# Ignore specific .env files within the envs directory
+envs/*.env
+# Explicitly allow .env.example files (optional but clear)
+!envs/*.env.example
+
+# Other ignored files/dirs
+.scripts
+.temp
+.ia
