@@ -35,3 +35,7 @@ envs/*.env
 .temp
 .ia
 .migdrp-scripts
+
+
+file.*
+response.*

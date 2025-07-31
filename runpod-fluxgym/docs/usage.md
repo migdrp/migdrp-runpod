@@ -19,13 +19,12 @@ FluxGym requiere modelos preentrenados (checkpoint, VAE, encoders). Se incluye u
 1.  **Accede a una terminal**: Usa JupyterLab ([http://localhost:8888](http://localhost:8888)) y abre una nueva terminal, o usa la Terminal Web ([http://localhost:7860](http://localhost:7860)).
 2.  **(Opcional) Edita el script**: Si necesitas descargar modelos específicos o desde URLs diferentes, edita el script:
     ```bash
-    # Puedes usar 'vim' o el editor de JupyterLab
-    vim /workspace/download_models.sh
-    ```
+vim /workspace/download_models.sh
+```
 3.  **Ejecuta el script**:
     ```bash
-    bash /workspace/download_models.sh
-    ```
+bash /workspace/download_models.sh
+```
     Los modelos se descargarán en las subcarpetas correspondientes dentro de `/workspace/models/`.
 
 ## Entrenamiento vía Línea de Comandos (CLI)
@@ -36,4 +35,5 @@ Aunque FluxGym tiene una UI para configurar entrenamientos, a veces es útil lan
 2.  **Localiza el Script `train.sh`**: Al preparar el entrenamiento, FluxGym generalmente crea un script llamado `train.sh` dentro de la carpeta de salida del trabajo, por ejemplo: `/workspace/fluxgym/outputs/<nombre_del_trabajo>/train.sh`.
 3.  **Ejecuta desde la Terminal**: Accede a una terminal (JupyterLab o Web) y ejecuta el script:
     ```bash
-    cd /workspace/fluxgym/outputs/<nombre_del_trabajo>/ && bash train.sh
+cd /workspace/fluxgym/outputs/<nombre_del_trabajo>/ && bash train.sh
+```

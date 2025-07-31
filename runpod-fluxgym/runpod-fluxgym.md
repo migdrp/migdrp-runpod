@@ -13,16 +13,15 @@ Imagen Docker optimizada para ejecutar [FluxGym](https://github.com/cocktailpean
 *   **Persistencia**: Usa un volumen Docker montado en `/workspace` para modelos, datasets, logs y la propia instalación de FluxGym.
 *   **Gestión**: Los servicios son gestionados por Supervisor.
 
-## Documentación Completa
-
-La documentación detallada se ha dividido en varios archivos dentro de la carpeta `docs/`:
+## Documentación Específica
 
 *   **[🚀 Inicio Rápido](./docs/quick_start.md)**: Cómo construir y ejecutar la imagen (Local y Runpod).
 *   **[🛠️ Uso de Servicios](./docs/usage.md)**: Cómo acceder a FluxGym, Jupyter, Terminal y descargar modelos.
 *   **[📜 Scripts (.sh)](./docs/scripts.md)**: Explicación de para qué sirve cada script de automatización.
-*   **[🐳 Flujo de Trabajo Docker](./docs/docker_workflow.md)**: Guía simplificada sobre imágenes, contenedores, volúmenes y cómo aplicar actualizaciones.
-*   **[⚙️ Gestión con Supervisor](./docs/supervisor.md)**: Comandos útiles para monitorizar y controlar los servicios.
-*   **[☁️ Gestión de Docker Hub](./docs/docker_hub.md)**: Comandos para subir y verificar imágenes en Docker Hub.
+
+## Documentación General del Proyecto
+
+Para entender mejor los conceptos generales que aplican a todas las imágenes del proyecto, consulta la [documentación general](../docs/).
 
 ## Archivos de Configuración
 

@@ -14,18 +14,15 @@ Imagen Docker optimizada para ejecutar [ComfyUI](https://github.com/comfyanonymo
 *   **Persistencia**: Usa un volumen Docker montado en `/workspace` para el código fuente de ComfyUI, modelos, nodos personalizados, logs, etc.
 *   **Gestión**: Los servicios son gestionados por Supervisor.
 
-## Documentación Detallada (Pendiente)
+## Documentación Específica
 
-*Idealmente, aquí habría enlaces a archivos en una carpeta `docs/` similar a `runpod-fluxgym`, detallando:*
+*   **[🚀 Inicio Rápido](./docs/quick_start.md)**: Cómo construir y ejecutar la imagen (Local y Runpod).
+*   **[🛠️ Uso de Servicios](./docs/usage.md)**: Cómo acceder a ComfyUI, Jupyter, Terminal y gestionar modelos/nodos.
+*   **[📜 Scripts (.sh)](./docs/scripts.md)**: Explicación de los scripts de automatización.
 
-*   *   **[🚀 Inicio Rápido](./docs/quick_start.md)**: Cómo construir y ejecutar la imagen (Local y Runpod).
-*   *   **[🛠️ Uso de Servicios](./docs/usage.md)**: Cómo acceder a ComfyUI, Jupyter, Terminal y gestionar modelos/nodos.
-*   *   **[📜 Scripts (.sh)](./docs/scripts.md)**: Explicación de los scripts de automatización.
-*   *   **[🐳 Flujo de Trabajo Docker](./docs/docker_workflow.md)**: Guía sobre imágenes, contenedores y volúmenes.
-*   *   **[⚙️ Gestión con Supervisor](./docs/supervisor.md)**: Comandos útiles para monitorizar servicios.
-*   *   **[☁️ Gestión de Docker Hub](./docs/docker_hub.md)**: Comandos para subir imágenes.
+## Documentación General del Proyecto
 
-*(Nota: Estos archivos aún no existen para ComfyUI, pero la estructura está preparada).*
+Para entender mejor los conceptos generales que aplican a todas las imágenes del proyecto, consulta la [documentación general](../docs/).
 
 ## Archivos de Configuración
 
@@ -41,17 +38,13 @@ Puedes construir la imagen desde dos ubicaciones:
 **A) Desde la Carpeta Raíz del Repositorio (`migdrp-runpod`) (Recomendado)**:
 
 ```bash
-# Asegúrate de estar en la carpeta raíz del repositorio
 docker build -t migdrp/runpod:comfyui -f runpod-comfyui/Dockerfile .
 ```
 
 **B) Desde la Carpeta Específica (`runpod-comfyui`)**:
 
 ```bash
-# Navega a la carpeta cd runpod-comfyui/
-cd runpod-comfyui
-docker build -t migdrp/runpod:comfyui .
-cd .. # Vuelve a la carpeta raíz
+cd runpod-comfyui && docker build -t migdrp/runpod:comfyui . && cd ..
 ```
 *Nota: Usa `--no-cache` si necesitas forzar una reconstrucción completa.*
 
@@ -64,12 +57,9 @@ cd .. # Vuelve a la carpeta raíz
 
 2.  **Ejecutar el Contenedor**:
     ```bash
-    # Opcional: Crear volumen nombrado persistente
-    # docker volume create comfyui_workspace
-
-    # Ejecutar desde la raíz
-    docker run -it --rm --name migdrp-runpod-comfyui --gpus all --env-file envs/runpod-comfyui.env -p 8888:8888 -p 7860:7860 -p 8188:8188 -v comfyui_workspace:/workspace -v ./runpod-comfyui/workspace:/workspace_template:ro migdrp/runpod:comfyui
-    ```
+# Opcional: docker volume create comfyui_workspace
+docker run -it --rm --name migdrp-runpod-comfyui --gpus all --env-file envs/runpod-comfyui.env -p 8888:8888 -p 7860:7860 -p 8188:8188 -v comfyui_workspace:/workspace -v ./runpod-comfyui/workspace:/workspace_template:ro migdrp/runpod:comfyui
+```
     *   `--env-file envs/runpod-comfyui.env`: Carga variables desde el archivo centralizado.
     *   `-v comfyui_workspace:/workspace`: Monta el volumen nombrado para persistencia.
     *   `-v ./runpod-comfyui/workspace:/workspace_template:ro`: Monta scripts locales como plantilla.
@@ -81,23 +71,9 @@ cd .. # Vuelve a la carpeta raíz
 
 2.  **Ejecutar el Contenedor**:
     ```bash
-    # Navega a la carpeta cd runpod-comfyui/
-    cd runpod-comfyui
-
-    # Opcional: Crear volumen nombrado persistente
-    # docker volume create comfyui_workspace
-
-    # Ejecutar desde la carpeta específica
-    docker run -it --rm --name migdrp-runpod-comfyui \
-      --gpus all \
-      --env-file .env \
-      -p 8888:8888 -p 7860:7860 -p 8188:8188 \
-      -v comfyui_workspace:/workspace \
-      -v ./workspace:/workspace_template:ro \
-      migdrp/runpod:comfyui
-
-    cd .. # Vuelve a la carpeta raíz
-    ```
+# Opcional: docker volume create comfyui_workspace
+cd runpod-comfyui && docker run -it --rm --name migdrp-runpod-comfyui --gpus all --env-file .env -p 8888:8888 -p 7860:7860 -p 8188:8188 -v comfyui_workspace:/workspace -v ./workspace:/workspace_template:ro migdrp/runpod:comfyui && cd ..
+```
 
 **Parámetros Comunes**:
 *   `--rm`: Elimina el contenedor al detenerlo (útil para pruebas). Omítelo para persistencia.
@@ -118,16 +94,12 @@ cd .. # Vuelve a la carpeta raíz
 *   Puedes usar JupyterLab, la Terminal Web, o herramientas como `wget` dentro del contenedor para descargar archivos.
 *   **ComfyUI-Manager**: No está preinstalado por defecto en esta versión. Si lo deseas, puedes instalarlo manualmente:
     ```bash
-    # Dentro de una terminal del contenedor:
-    ```bash
-    cd /workspace/ComfyUI/custom_nodes && git clone https://github.com/ltdrdata/ComfyUI-Manager.git && supervisorctl restart comfyui
-    ```
+# Dentro de una terminal del contenedor:
+cd /workspace/ComfyUI/custom_nodes && git clone https://github.com/ltdrdata/ComfyUI-Manager.git && supervisorctl restart comfyui
+```
 
 ## Despliegue en Docker Hub
 
 ```bash
-# Iniciar sesión
-docker login
-
-# Subir la imagen (asegúrate de haberla construido y etiquetado correctamente)
-docker push migdrp/runpod:comfyui
+docker login && docker push migdrp/runpod:comfyui
+```

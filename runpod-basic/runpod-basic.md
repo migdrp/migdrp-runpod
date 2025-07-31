@@ -34,17 +34,13 @@ Puedes construir la imagen desde dos ubicaciones:
 **A) Desde la Carpeta Raíz del Repositorio (`migdrp-runpod`) (Recomendado)**:
 
 ```bash
-# Asegúrate de estar en la carpeta raíz del repositorio
 docker build -t migdrp/runpod:basic -f runpod-basic/Dockerfile .
 ```
 
 **B) Desde la Carpeta Específica (`runpod-basic`)**:
 
 ```bash
-# Navega a la carpeta cd runpod-basic/
-cd runpod-basic
-docker build -t migdrp/runpod:basic .
-cd .. # Vuelve a la carpeta raíz
+cd runpod-basic && docker build -t migdrp/runpod:basic . && cd ..
 ```
 *Nota: Usa `--no-cache` si necesitas forzar una reconstrucción completa.*
 
@@ -57,12 +53,9 @@ cd .. # Vuelve a la carpeta raíz
 
 2.  **Ejecutar el Contenedor**:
     ```bash
-    # Opcional: Crear volumen nombrado persistente
-    # docker volume create basic_workspace
-
-    # Ejecutar desde la raíz
-    docker run -it --rm --name migdrp-runpod-basic --env-file envs/runpod-basic.env -p 8888:8888 -p 7860:7860 -v basic_workspace:/workspace -v ./runpod-basic/workspace:/workspace_template:ro migdrp/runpod:basic
-    ```
+# Opcional: docker volume create basic_workspace
+docker run -it --rm --name migdrp-runpod-basic --env-file envs/runpod-basic.env -p 8888:8888 -p 7860:7860 -v basic_workspace:/workspace -v ./runpod-basic/workspace:/workspace_template:ro migdrp/runpod:basic
+```
     *   `--env-file envs/runpod-basic.env`: Carga variables desde el archivo centralizado.
     *   `-v basic_workspace:/workspace`: Monta el volumen nombrado para persistencia.
     *   `-v ./runpod-basic/workspace:/workspace_template:ro`: Monta scripts locales como plantilla.
@@ -74,17 +67,9 @@ cd .. # Vuelve a la carpeta raíz
 
 2.  **Ejecutar el Contenedor**:
     ```bash
-    # Navega a la carpeta cd runpod-basic/
-    cd runpod-basic
-
-    # Opcional: Crear volumen nombrado persistente
-    # docker volume create basic_workspace
-
-    # Ejecutar desde la carpeta específica
-    docker run -it --rm --name migdrp-runpod-basic --env-file .env -p 8888:8888 -p 7860:7860 -v basic_workspace:/workspace -v ./workspace:/workspace_template:ro migdrp/runpod:basic
-
-    cd .. # Vuelve a la carpeta raíz
-    ```
+# Opcional: docker volume create basic_workspace
+cd runpod-basic && docker run -it --rm --name migdrp-runpod-basic --env-file .env -p 8888:8888 -p 7860:7860 -v basic_workspace:/workspace -v ./workspace:/workspace_template:ro migdrp/runpod:basic && cd ..
+```
 
 **Parámetros Comunes**:
 *   `--rm`: Elimina el contenedor al detenerlo (útil para pruebas). Omítelo para persistencia.
@@ -96,70 +81,28 @@ cd .. # Vuelve a la carpeta raíz
 
 *(En Runpod, usa los enlaces HTTP proporcionados por la plataforma).*
 
-## Gestión de Servicios (Supervisor)
+## Documentación Específica
 
-Puedes gestionar los servicios (Jupyter, ttyd) usando `supervisorctl` dentro del contenedor (vía Terminal Web o `docker exec`).
+*   **[🚀 Inicio Rápido](./docs/quick_start.md)**: Cómo construir y ejecutar la imagen (Local y Runpod).
+*   **[🛠️ Uso de Servicios](./docs/usage.md)**: Cómo acceder a Jupyter, Terminal y trabajar con el entorno.
+*   **[📜 Scripts (.sh)](./docs/scripts.md)**: Explicación de los scripts de automatización.
 
-```bash
-# Ver estado de los servicios
-supervisorctl status
+## Documentación General del Proyecto
 
-# Detener un servicio específico
-supervisorctl stop [jupyter|ttyd]
-
-# Iniciar un servicio
-supervisorctl start [jupyter|ttyd]
-
-# Reiniciar un servicio
-supervisorctl restart [jupyter|ttyd]
-
-# Ver logs de un servicio (últimas líneas)
-supervisorctl tail jupyter
-supervisorctl tail ttyd stderr
-
-# Seguir logs en tiempo real
-supervisorctl tail -f jupyter
-```
-
-## Despliegue en Docker Hub
-
-```bash
-# Iniciar sesión
-docker login
-
-# Subir la imagen (asegúrate de haberla construido y etiquetado correctamente)
-docker push migdrp/runpod:basic
-```
+Para entender mejor los conceptos generales que aplican a todas las imágenes del proyecto, consulta la [documentación general](../docs/).
 
 ## Mantenimiento
 
 ### Gestión de Contenedores
 
 ```bash
-# Listar contenedores
-docker ps -a
-
-# Iniciar contenedor existente (si no se usó --rm)
-docker start -i migdrp-runpod-basic
-
-# Detener contenedor
-docker stop migdrp-runpod-basic
-
-# Eliminar contenedor (si no se usó --rm)
-docker rm -f migdrp-runpod-basic
+docker ps -a && docker start -i migdrp-runpod-basic && docker stop migdrp-runpod-basic && docker rm -f migdrp-runpod-basic
 ```
 
 ### Gestión de Recursos
 
 ```bash
-# Listar volúmenes
-docker volume ls
-
-# Eliminar volumen (¡BORRA DATOS PERSISTENTES!)
-docker volume rm basic_workspace
-
-# Limpiar recursos Docker no utilizados (contenedores parados, redes, imágenes colgantes)
-docker system prune
+docker volume ls && docker volume rm basic_workspace && docker system prune
 ```
 
 ## Estructura de Directorios Relevante

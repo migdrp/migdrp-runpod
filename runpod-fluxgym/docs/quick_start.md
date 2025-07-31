@@ -20,7 +20,6 @@ Puedes construir la imagen desde dos ubicaciones:
 Esta es la forma recomendada, ya que centraliza la gestión.
 
 ```bash
-# Asegúrate de estar en la carpeta raíz del repositorio
 docker build -t migdrp/runpod:fluxgym -f runpod-fluxgym/Dockerfile .
 ```
 *   `-t migdrp/runpod:fluxgym`: Asigna el nombre y tag a la imagen.
@@ -31,10 +30,7 @@ docker build -t migdrp/runpod:fluxgym -f runpod-fluxgym/Dockerfile .
 Si prefieres trabajar directamente dentro de la carpeta de la imagen.
 
 ```bash
-# Navega a la carpeta cd runpod-fluxgym/
-cd runpod-fluxgym
-docker build -t migdrp/runpod:fluxgym .
-cd .. # Vuelve a la carpeta raíz
+cd runpod-fluxgym && docker build -t migdrp/runpod:fluxgym . && cd ..
 ```
 
 *Nota: Si modificas el `Dockerfile` y los cambios no parecen aplicarse, reconstruye usando `--no-cache` (ej. `docker build --no-cache ...`) para ignorar las capas cacheadas.*
@@ -51,13 +47,9 @@ Utiliza el archivo de entorno centralizado.
 
 2.  **Ejecutar el Contenedor**:
     ```bash
-    # Opcional: Crear un volumen persistente la primera vez
-    # docker volume create fluxgym_workspace
-
-    # Ejecutar el contenedor desde la raíz
-    # Usará el volumen 'fluxgym_workspace' y el env centralizado
-    docker run -it --rm --name migdrp-runpod-fluxgym --gpus all --env-file envs/runpod-fluxgym.env -p 8888:8888 -p 7860:7860 -p 7862:7862 -v fluxgym_workspace:/workspace -v ./runpod-fluxgym/workspace:/workspace_template:ro migdrp/runpod:fluxgym
-    ```
+# Opcional: docker volume create fluxgym_workspace
+docker run -it --rm --name migdrp-runpod-fluxgym --gpus all --env-file envs/runpod-fluxgym.env -p 8888:8888 -p 7860:7860 -p 7862:7862 -v fluxgym_workspace:/workspace -v ./runpod-fluxgym/workspace:/workspace_template:ro migdrp/runpod:fluxgym
+```
     *   `--env-file envs/runpod-fluxgym.env`: Carga las variables desde el archivo de entorno centralizado.
     *   `-v fluxgym_workspace:/workspace`: Monta un volumen nombrado `fluxgym_workspace` para persistencia. **Se recomienda usar volúmenes nombrados en lugar de `workspace` genérico para evitar conflictos entre tags.**
     *   `-v ./runpod-fluxgym/workspace:/workspace_template:ro`: Monta la carpeta local de scripts como plantilla de solo lectura.
@@ -71,24 +63,9 @@ Utiliza un archivo `.env` local dentro de esa carpeta.
 
 2.  **Ejecutar el Contenedor**:
     ```bash
-    # Navega a la carpeta cd runpod-fluxgym/
-    cd runpod-fluxgym
-
-    # Opcional: Crear un volumen persistente la primera vez
-    # docker volume create fluxgym_workspace
-
-    # Ejecutar el contenedor desde la carpeta específica
-    # Usará el volumen 'fluxgym_workspace' y el .env local
-    docker run -it --rm --name migdrp-runpod-fluxgym \
-      --gpus all \
-      --env-file .env \
-      -p 8888:8888 -p 7860:7860 -p 7862:7862 \
-      -v fluxgym_workspace:/workspace \
-      -v ./workspace:/workspace_template:ro \
-      migdrp/runpod:fluxgym
-
-    cd .. # Vuelve a la carpeta raíz
-    ```
+# Opcional: docker volume create fluxgym_workspace
+cd runpod-fluxgym && docker run -it --rm --name migdrp-runpod-fluxgym --gpus all --env-file .env -p 8888:8888 -p 7860:7860 -p 7862:7862 -v fluxgym_workspace:/workspace -v ./workspace:/workspace_template:ro migdrp/runpod:fluxgym && cd ..
+```
     *   `--env-file .env`: Carga las variables desde el archivo `.env` local.
     *   `-v ./workspace:/workspace_template:ro`: Monta la carpeta local de scripts (relativa a `runpod-fluxgym`).
 
@@ -99,7 +76,7 @@ Utiliza un archivo `.env` local dentro de esa carpeta.
 *   `--gpus all`: Habilita el acceso a todas las GPUs NVIDIA (requiere NVIDIA Container Toolkit).
 *   `-p PUERTO_HOST:PUERTO_CONTENEDOR`: Mapea los puertos.
 
-Consulta la guía [Flujo de Trabajo Docker](./docker_workflow.md) para entender mejor cómo funcionan las actualizaciones y los volúmenes.
+Consulta la guía [Flujo de Trabajo Docker](../../docs/docker_workflow.md) para entender mejor cómo funcionan las actualizaciones y los volúmenes.
 
 3.  **Ejecutar el Contenedor de Forma Persistente (Sin `--rm`)**:
     Si quieres que el contenedor permanezca después de detenerlo (para poder reiniciarlo rápidamente sin recrearlo), simplemente omite la opción `--rm` en cualquiera de los comandos `docker run` anteriores.
@@ -114,7 +91,7 @@ Consulta la guía [Flujo de Trabajo Docker](./docker_workflow.md) para entender 
     *   Asegúrate de haber construido la imagen (`docker build ...`).
     *   Inicia sesión: `docker login`
     *   Sube la imagen: `docker push migdrp/runpod:fluxgym`
-    *   (Consulta [Gestión de Docker Hub](./docker_hub.md) para más comandos).
+    *   (Consulta [Gestión de Docker Hub](../../docs/docker_hub.md) para más comandos).
 
 2.  **Crear Pod en Runpod**:
     *   Ve a Runpod y crea un nuevo Pod (GPU).
