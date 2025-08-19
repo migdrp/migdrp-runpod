@@ -36,7 +36,9 @@ envs/*.env
 .ia
 .migdrp-scripts
 
+/migdrp/
 migdrp/
+migdrp
 migdrp/*
 file.*
 #response.*
