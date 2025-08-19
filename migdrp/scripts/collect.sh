@@ -3,10 +3,10 @@
 # --- Configuration ---
 SINGLE_OUTPUT_FILE="file.codebase.md"
 TARGET_DIRS=(
+  "runpod-video-wan"
   "runpod-comfyui"
-  "runpod-basic"
   "runpod-fluxgym"
-  "docs"
+  "runpod-basic"
 ) # Puedes añadir "server" aquí si existe y lo necesitas
 
 # --- Directories to Exclude ---

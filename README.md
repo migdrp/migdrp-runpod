@@ -24,7 +24,7 @@ El objetivo es proporcionar imágenes preconfiguradas y optimizadas para diferen
 ## Uso General
 
 1.  **Clonar el Repositorio**:
-    ```bash
+```bash
 git clone <URL_DEL_REPOSITORIO> && cd migdrp-runpod
 ```
 
@@ -35,22 +35,26 @@ git clone <URL_DEL_REPOSITORIO> && cd migdrp-runpod
 
 3.  **Construir una Imagen (desde la raíz)**:
     Reemplaza `<tag>` con la etiqueta deseada (ej. `fluxgym`, `comfyui`, `basic`).
-    ```bash
+```bash
 docker build -t migdrp/runpod:<tag> -f runpod-<tag>/Dockerfile .
-```
-    *Ejemplo para FluxGym:*
-    ```bash
+```    
+*Ejemplo para FluxGym:*
+
+```bash
 docker build -t migdrp/runpod:fluxgym -f runpod-fluxgym/Dockerfile .
 ```
 
 4.  **Ejecutar un Contenedor (desde la raíz)**:
     Reemplaza `<tag>` y ajusta los puertos/volúmenes según la documentación específica de cada tag. **Se recomienda usar volúmenes nombrados específicos por tag** (ej. `fluxgym_workspace`, `comfyui_workspace`, `basic_workspace`).
-    ```bash
+
+```bash
 # Ejemplo genérico (ver docs de cada tag para detalles)
 docker run -it --rm --name migdrp-runpod-<tag> --gpus all --env-file envs/runpod-<tag>.env -p <puertos> -v <tag>_workspace:/workspace -v ./runpod-<tag>/workspace:/workspace_template:ro migdrp/runpod:<tag>
 ```
-    *Ejemplo para FluxGym:*
-    ```bash
+    
+*Ejemplo para FluxGym:*
+
+```bash
 docker run -it --rm --name migdrp-runpod-fluxgym --gpus all --env-file envs/runpod-fluxgym.env -p 8888:8888 -p 7860:7860 -p 7862:7862 -v fluxgym_workspace:/workspace -v ./runpod-fluxgym/workspace:/workspace_template:ro migdrp/runpod:fluxgym
 ```
 
