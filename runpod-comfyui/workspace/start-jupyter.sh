@@ -1,19 +1,22 @@
 #!/bin/bash
 set -e
 
-# Función de logging
+# --- Configuration ---
+VENV_PATH="/opt/venv_jupyter"
+JUPYTER_EXECUTABLE="$VENV_PATH/bin/jupyter"
+PYTHON_EXECUTABLE="$VENV_PATH/bin/python"
+
+# --- Logging Function ---
 log() {
-    echo "[$(date --iso-8601=seconds)] $1"
+    echo "[$(date --iso-8601=seconds)] [Jupyter-Starter] $1"
 }
 
-# Función para configurar JupyterLab
+# --- Setup JupyterLab ---
 setup_jupyter() {
-    log "Configurando JupyterLab..."
-    source /opt/comfyui_env/bin/activate
-
+    log "Configuring JupyterLab using venv at $VENV_PATH..."
     mkdir -p /root/.jupyter
 
-    # Configuración del tema oscuro
+    # Dark theme configuration
     mkdir -p /root/.jupyter/lab/user-settings/@jupyterlab/apputils-extension
     cat > /root/.jupyter/lab/user-settings/@jupyterlab/apputils-extension/themes.jupyterlab-settings << EOL
 {
@@ -21,12 +24,14 @@ setup_jupyter() {
 }
 EOL
 
-    # Generar configuración solo si no existe
+    # Generate config only if it doesn't exist
     if [ ! -f /root/.jupyter/jupyter_server_config.py ]; then
-        jupyter lab --generate-config
+        log "Generating new Jupyter server config..."
+        $JUPYTER_EXECUTABLE lab --generate-config
 
         if [ -n "${JUPYTER_PASSWORD}" ]; then
-            PASSWD_HASH=$(python -c "from jupyter_server.auth import passwd; print(passwd('${JUPYTER_PASSWORD}'))")
+            log "Setting JUPYTER_PASSWORD..."
+            PASSWD_HASH=$($PYTHON_EXECUTABLE -c "from jupyter_server.auth import passwd; print(passwd('${JUPYTER_PASSWORD}'))")
             cat > /root/.jupyter/jupyter_server_config.py << EOL
 c.ServerApp.ip = '0.0.0.0'
 c.ServerApp.allow_root = True
@@ -41,6 +46,7 @@ c.ServerApp.allow_credentials = True
 c.ServerApp.disable_check_xsrf = True
 EOL
         else
+            log "WARNING: JUPYTER_PASSWORD not set, using empty password."
             cat > /root/.jupyter/jupyter_server_config.py << EOL
 c.ServerApp.ip = '0.0.0.0'
 c.ServerApp.allow_root = True
@@ -54,44 +60,32 @@ c.ServerApp.allow_origin = '*'
 c.ServerApp.allow_credentials = True
 c.ServerApp.disable_check_xsrf = True
 EOL
-            log "ADVERTENCIA: No se ha establecido JUPYTER_PASSWORD, usando contraseña vacía"
         fi
+    else
+        log "Jupyter server config already exists. Skipping generation."
     fi
-
-    deactivate
 }
 
-# Función para iniciar JupyterLab
+# --- Start JupyterLab ---
 start_jupyter() {
-    log "Iniciando JupyterLab..."
-    source /opt/comfyui_env/bin/activate
+    log "Starting JupyterLab server..."
     
-    # Verificar si el puerto está en uso
+    # Check if port is in use
     if lsof -Pi :8888 -sTCP:LISTEN -t >/dev/null ; then
-        log "Puerto 8888 en uso. Intentando liberar..."
+        log "Port 8888 is in use. Attempting to free it..."
         lsof -ti :8888 | xargs kill -9 || true
         sleep 2
     fi
 
     cd /
-    # El servidor usará automáticamente el archivo de configuración que creamos
-    exec jupyter lab
+    # The server will automatically use the config file we created
+    exec $JUPYTER_EXECUTABLE lab
 }
 
-# Función para limpiar al salir
-cleanup() {
-    log "Limpiando..."
-    deactivate 2>/dev/null || true
-}
-
-# Registrar función de limpieza
-trap cleanup EXIT
-
-# Principal
+# --- Main Execution ---
 main() {
     setup_jupyter
     start_jupyter
 }
 
-# Ejecutar script
 main "$@"

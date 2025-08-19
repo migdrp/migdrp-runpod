@@ -9,38 +9,42 @@ ENV DEBIAN_FRONTEND=noninteractive
 ARG SRC_PATH=.
 
 # --- PASO 2: Instalar dependencias del sistema ---
-# Esta capa se cacheará eficientemente ya que rara vez cambia.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3.10 python3.10-venv python3-pip \
-    curl wget git build-essential tini vim supervisor procps net-tools lsof \
+    curl wget git build-essential tini vim supervisor procps net-tools lsof rsync \
     libgl1 libglib2.0-0 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# --- PASO 3: Crear, configurar y activar el entorno virtual único ---
-RUN python3.10 -m venv /opt/comfyui_env
-ENV PATH="/opt/comfyui_env/bin:$PATH"
+# --- PASO 3: Crear entornos virtuales aislados ---
+RUN python3.10 -m venv /opt/venv_comfyui
+RUN python3.10 -m venv /opt/venv_jupyter
 
-# --- PASO 4: Instalar dependencias de Python (de más estable a más volátil) ---
-# Se actualiza pip primero en su propia capa.
-RUN pip install --no-cache-dir -U pip setuptools wheel
+# --- PASO 4: Instalar dependencias de Python en sus respectivos entornos ---
 
-# Se instala PyTorch, la dependencia más pesada y estable. Esta capa se cacheará casi siempre.
-RUN pip install --no-cache-dir --upgrade torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
-
+# --- 4.1: Dependencias de ComfyUI ---
+# Se actualiza pip en el venv de ComfyUI.
+RUN /opt/venv_comfyui/bin/pip install --no-cache-dir -U pip setuptools wheel
+# Se instala PyTorch, la dependencia más pesada.
+RUN /opt/venv_comfyui/bin/pip install --no-cache-dir --upgrade torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
 # Se clona ComfyUI y se instalan sus requisitos.
 RUN git clone https://github.com/comfyanonymous/ComfyUI.git /opt/ComfyUI
-RUN pip install --no-cache-dir -r /opt/ComfyUI/requirements.txt
-
-# Se pre-instala ComfyUI-Manager para simplificar el uso.
+RUN /opt/venv_comfyui/bin/pip install --no-cache-dir -r /opt/ComfyUI/requirements.txt
+# Se instalan dependencias adicionales para nodos personalizados.
+RUN /opt/venv_comfyui/bin/pip install --no-cache-dir uv GitPython gguf
+# Se pre-instala ComfyUI-Manager.
 RUN git clone https://github.com/ltdrdata/ComfyUI-Manager.git /opt/ComfyUI/custom_nodes/ComfyUI-Manager
 
-# Se instalan Jupyter y ttyd.
-RUN pip install --no-cache-dir jupyterlab terminado jupyterlab-system-monitor
+# --- 4.2: Dependencias de JupyterLab ---
+# Se actualiza pip en el venv de Jupyter.
+RUN /opt/venv_jupyter/bin/pip install --no-cache-dir -U pip setuptools wheel
+# Se instalan Jupyter y sus extensiones.
+RUN /opt/venv_jupyter/bin/pip install --no-cache-dir jupyterlab terminado jupyterlab-system-monitor
+
+# --- 4.3: Otras herramientas ---
 RUN wget https://github.com/tsl0922/ttyd/releases/download/1.7.3/ttyd.x86_64 -O /usr/local/bin/ttyd \
     && chmod +x /usr/local/bin/ttyd
 
 # --- PASO 5: Configuración final del contenedor ---
-# Copiamos los archivos locales al final para no invalidar la caché de los pasos anteriores.
 COPY ${SRC_PATH}/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY ${SRC_PATH}/workspace/ /workspace_template/
 

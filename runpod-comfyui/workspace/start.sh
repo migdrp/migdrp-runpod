@@ -46,7 +46,7 @@ fix_permissions() {
         return
     fi
     log "Estableciendo permisos por primera vez (puede tardar un momento)..."
-    mkdir -p /var/log/supervisor /workspace /workspace/models /workspace/custom_nodes /root/.jupyter
+    mkdir -p /var/log/supervisor /workspace /root/.jupyter
     chmod 755 /var/log/supervisor
     chmod -R 755 /opt/comfyui_env 2>/dev/null || true
     chmod -R 777 /workspace || log_warning "Could not chmod /workspace to 777."
@@ -58,7 +58,8 @@ fix_permissions() {
 setup_workspace() {
     log "Setting up workspace and ensuring latest scripts..."
     if [ -d "/workspace_template" ]; then
-        # Sobrescribe explícitamente los scripts de control principales.
+        # Sobrescribe explícitamente los scripts de control principales en cada inicio.
+        # Esto asegura que los cambios en la imagen se reflejen sin destruir el volumen.
         log "Overwriting startup scripts with the latest versions from the image..."
         cp /workspace_template/start.sh /workspace/start.sh
         cp /workspace_template/start-comfyui.sh /workspace/start-comfyui.sh
@@ -66,7 +67,8 @@ setup_workspace() {
         
         # Copia la carpeta de model_setups, sobrescribiendo si existe.
         log "Updating model setup scripts..."
-        cp -r /workspace_template/model_setups /workspace/
+        # Usamos rsync para una copia más robusta que también elimina archivos borrados en la fuente.
+        rsync -a --delete /workspace_template/model_setups/ /workspace/model_setups/
 
         # Asegura que todos los scripts sean ejecutables.
         chmod +x /workspace/*.sh 2>/dev/null || true

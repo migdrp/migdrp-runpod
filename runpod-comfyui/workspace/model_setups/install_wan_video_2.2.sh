@@ -33,11 +33,11 @@ log "Descargando ComfyUI-Manager..."
 download_git_repo https://github.com/ltdrdata/ComfyUI-Manager.git "$CUSTOM_NODES_DIR"
 
 # --- 2. Modelos Wan 2.2 ---
-MODELS_DIR="/workspace/models"
+COMFYUI_MODELS_DIR="/workspace/ComfyUI/models"
 log "Descargando Modelos para Wan Video 2.2..."
 
 # --- Modelos Unet (GGUF) ---
-DIFFUSION_MODELS_DIR="$MODELS_DIR/diffusion_models"
+DIFFUSION_MODELS_DIR="$COMFYUI_MODELS_DIR/gguf" # ComfyUI busca GGUF en la carpeta 'gguf'
 log "Descargando Unets GGUF (Q4_K_M)..."
 # Modelo High Noise (Text-to-Video)
 download_file "https://huggingface.co/QuantStack/Wan2.2-T2V-A14B-GGUF/resolve/main/HighNoise/Wan2.2-T2V-A14B-HighNoise-Q4_K_M.gguf" "$DIFFUSION_MODELS_DIR"
@@ -45,17 +45,17 @@ download_file "https://huggingface.co/QuantStack/Wan2.2-T2V-A14B-GGUF/resolve/ma
 download_file "https://huggingface.co/QuantStack/Wan2.2-T2V-A14B-GGUF/resolve/main/LowNoise/Wan2.2-T2V-A14B-LowNoise-Q4_K_M.gguf" "$DIFFUSION_MODELS_DIR"
 
 # --- Text Encoder (CLIP) ---
-TEXT_ENCODERS_DIR="$MODELS_DIR/text_encoders"
+TEXT_ENCODERS_DIR="$COMFYUI_MODELS_DIR/clip" # Carpeta estándar para CLIP
 log "Descargando Text Encoder umt5..."
 download_file "https://huggingface.co/Comfy-Org/Man_2.2_ComfyUI_Repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors" "$TEXT_ENCODERS_DIR"
 
 # --- VAE ---
-VAE_DIR="$MODELS_DIR/vae"
+VAE_DIR="$COMFYUI_MODELS_DIR/vae"
 log "Descargando VAE..."
 download_file "https://huggingface.co/Comfy-Org/Man_2.2_ComfyUI_Repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors" "$VAE_DIR"
 
 # --- LoRA ---
-LORA_DIR="$MODELS_DIR/loras"
+LORA_DIR="$COMFYUI_MODELS_DIR/loras"
 log "Descargando LoRA lightx2v..."
 download_file "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Wan21_T2V_14B_lightx2v_cfg_step_distill_lora_rank32.safetensors" "$LORA_DIR"
 
