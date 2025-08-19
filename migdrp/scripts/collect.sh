@@ -7,6 +7,7 @@ TARGET_DIRS=(
   "runpod-comfyui"
   "runpod-fluxgym"
   "runpod-basic"
+  "docs"
 ) # Puedes añadir "server" aquí si existe y lo necesitas
 
 # --- Directories to Exclude ---

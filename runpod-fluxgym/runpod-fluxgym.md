@@ -3,28 +3,27 @@
 [![Docker Hub](https://img.shields.io/docker/v/migdrp/runpod/fluxgym?sort=semver)](https://hub.docker.com/r/migdrp/runpod)
 [<- Volver al README principal](../README.md)
 
-Imagen Docker optimizada para ejecutar [FluxGym](https://github.com/cocktailpeanut/fluxgym) (con soporte para SD3) en plataformas GPU como [Runpod](https://runpod.io). Incluye JupyterLab y una terminal web (`ttyd`).
+Imagen Docker para [FluxGym](https://github.com/cocktailpeanut/fluxgym) con CUDA 12.1, JupyterLab y terminal web.
 
-**Características Principales:**
+**Para una guía detallada sobre el uso de los servicios, consulta la [Guía de Uso: FluxGym](../docs/usage-fluxgym.md).**
 
-*   **Base**: Python 3.10 slim
-*   **Servicios**: FluxGym UI, JupyterLab, Terminal Web (ttyd)
-*   **Instalación Dinámica**: FluxGym y dependencias (`sd-scripts`) se instalan/actualizan al inicio dentro del volumen persistente `/workspace`.
-*   **Persistencia**: Usa un volumen Docker montado en `/workspace` para modelos, datasets, logs y la propia instalación de FluxGym.
-*   **Gestión**: Los servicios son gestionados por Supervisor.
+## Construcción de la Imagen
 
-## Documentación Específica
+Desde la **raíz del repositorio**:
+```bash
+docker build --build-arg SRC_PATH=runpod-fluxgym -t migdrp/runpod:fluxgym -f runpod-fluxgym/Dockerfile .
+```
 
-*   **[🚀 Inicio Rápido](./docs/quick_start.md)**: Cómo construir y ejecutar la imagen (Local y Runpod).
-*   **[🛠️ Uso de Servicios](./docs/usage.md)**: Cómo acceder a FluxGym, Jupyter, Terminal y descargar modelos.
-*   **[📜 Scripts (.sh)](./docs/scripts.md)**: Explicación de para qué sirve cada script de automatización.
+## Ejecución Local
 
-## Documentación General del Proyecto
+Desde la **raíz del repositorio**:
+```bash
+# Asegúrate de que envs/runpod-fluxgym.env existe y está configurado
+docker run -it --rm --name migdrp-runpod-fluxgym --gpus all --env-file envs/runpod-fluxgym.env -p 7862:7862 -p 8888:8888 -p 7860:7860 -v fluxgym_workspace:/workspace -v ./runpod-fluxgym/workspace:/workspace_template:ro migdrp/runpod:fluxgym
+```
 
-Para entender mejor los conceptos generales que aplican a todas las imágenes del proyecto, consulta la [documentación general](../docs/).
+## Acceso a Servicios (Localmente)
 
-## Archivos de Configuración
-
-*   `.env.example`: Plantilla para variables de entorno locales (`JUPYTER_PASSWORD`, `HUGGINGFACE_TOKEN`).
-*   `Dockerfile`: Define la construcción de la imagen.
-*   `supervisord.conf`: Configuración de los servicios para Supervisor.
+*   **FluxGym UI**: `http://localhost:7862`
+*   **JupyterLab**: `http://localhost:8888`
+*   **Terminal Web**: `http://localhost:7860`

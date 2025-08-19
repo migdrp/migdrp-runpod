@@ -6,60 +6,42 @@ Este repositorio contiene las definiciones de imágenes Docker optimizadas para 
 
 ## Estructura del Repositorio
 
-Cada carpeta principal dentro de este repositorio corresponde a una **etiqueta (tag)** específica de la imagen `migdrp/runpod` en Docker Hub.
-
-*   **`runpod-fluxgym/`**: Contiene los archivos para construir la imagen `migdrp/runpod:fluxgym`, optimizada para [FluxGym](https://github.com/cocktailpeanut/fluxgym). ([Ver runpod-fluxgym.md](./runpod-fluxgym/runpod-fluxgym.md))
-*   **`runpod-comfyui/`**: Contiene los archivos para construir la imagen `migdrp/runpod:comfyui`, optimizada para [ComfyUI](https://github.com/comfyanonymous/ComfyUI). ([Ver runpod-comfyui.md](./runpod-comfyui/runpod-comfyui.md))
-*   **`runpod-basic/`**: Contiene los archivos para construir la imagen `migdrp/runpod:basic`, una imagen mínima con JupyterLab y Terminal Web (ttyd), gestionada por Supervisor. No incluye herramientas de IA específicas. ([Ver runpod-basic.md](./runpod-basic/runpod-basic.md))
-*   **`envs/`**: Contiene los archivos de variables de entorno (`.env`) para cada tag. Se recomienda usar estos archivos centralizados al ejecutar los contenedores desde la raíz de este repositorio.
-*   **`docs/`**: Contiene documentación general sobre conceptos comunes a todas las imágenes:
-    *   **[Docker Workflow](./docs/docker_workflow.md)**: Guía sobre imágenes, contenedores y volúmenes.
-    *   **[Supervisor](./docs/supervisor.md)**: Cómo monitorizar y controlar servicios.
-    *   **[Docker Hub](./docs/docker_hub.md)**: Gestión de imágenes en el registro.
-
-## Propósito
-
-El objetivo es proporcionar imágenes preconfiguradas y optimizadas para diferentes cargas de trabajo de IA/ML en plataformas como Runpod, facilitando el despliegue y uso de herramientas populares.
+*   **`runpod-basic/`**: Imagen mínima con JupyterLab y Terminal Web. ([Ver Guía](./runpod-basic/runpod-basic.md))
+*   **`runpod-comfyui/`**: Imagen optimizada para [ComfyUI](https://github.com/comfyanonymous/ComfyUI). ([Ver Guía](./runpod-comfyui/runpod-comfyui.md))
+*   **`runpod-fluxgym/`**: Imagen optimizada para [FluxGym](https://github.com/cocktailpeanut/fluxgym). ([Ver Guía](./runpod-fluxgym/runpod-fluxgym.md))
+*   **`envs/`**: Archivos de variables de entorno (`.env`) para cada tag.
+*   **`docs/`**: Documentación general y guías de uso detalladas para cada imagen.
+    *   **[Flujo de Trabajo Docker](./docs/docker_workflow.md)**
+    *   **[Gestión con Supervisor](./docs/supervisor.md)**
+    *   **[Guía de Uso: Basic](./docs/usage-basic.md)**
+    *   **[Guía de Uso: ComfyUI](./docs/usage-comfyui.md)**
+    *   **[Guía de Uso: FluxGym](./docs/usage-fluxgym.md)**
 
 ## Uso General
 
-1.  **Clonar el Repositorio**:
-```bash
-git clone <URL_DEL_REPOSITORIO> && cd migdrp-runpod
-```
+1.  **Clonar y Configurar**: Clona el repo, navega a `envs/`, copia los `.env.example` a `.env` y edítalos con tus credenciales.
 
-2.  **Configurar Entornos**:
-    *   Navega a la carpeta `envs/`.
-    *   Copia los archivos `.env.example` a `.env` (ej. `cp runpod-fluxgym.env.example envs/runpod-fluxgym.env`).
-    *   Edita los archivos `.env` correspondientes con tus credenciales (ej. `JUPYTER_PASSWORD`, `HUGGINGFACE_TOKEN`).
+2.  **Construir una Imagen (desde la raíz)**:
+    Usa `--build-arg` para especificar el contexto. Reemplaza `<tag>` con `basic`, `comfyui`, o `fluxgym`.
 
-3.  **Construir una Imagen (desde la raíz)**:
-    Reemplaza `<tag>` con la etiqueta deseada (ej. `fluxgym`, `comfyui`, `basic`).
-```bash
-docker build -t migdrp/runpod:<tag> -f runpod-<tag>/Dockerfile .
-```    
-*Ejemplo para FluxGym:*
-
-```bash
-docker build -t migdrp/runpod:fluxgym -f runpod-fluxgym/Dockerfile .
-```
-
-4.  **Ejecutar un Contenedor (desde la raíz)**:
-    Reemplaza `<tag>` y ajusta los puertos/volúmenes según la documentación específica de cada tag. **Se recomienda usar volúmenes nombrados específicos por tag** (ej. `fluxgym_workspace`, `comfyui_workspace`, `basic_workspace`).
-
-```bash
-# Ejemplo genérico (ver docs de cada tag para detalles)
-docker run -it --rm --name migdrp-runpod-<tag> --gpus all --env-file envs/runpod-<tag>.env -p <puertos> -v <tag>_workspace:/workspace -v ./runpod-<tag>/workspace:/workspace_template:ro migdrp/runpod:<tag>
-```
+    ```bash
+    docker build --build-arg SRC_PATH=runpod-<tag> -t migdrp/runpod:<tag> -f runpod-<tag>/Dockerfile .
     
-*Ejemplo para FluxGym:*
+    ```
+    *Ejemplo para ComfyUI:*
 
-```bash
-docker run -it --rm --name migdrp-runpod-fluxgym --gpus all --env-file envs/runpod-fluxgym.env -p 8888:8888 -p 7860:7860 -p 7862:7862 -v fluxgym_workspace:/workspace -v ./runpod-fluxgym/workspace:/workspace_template:ro migdrp/runpod:fluxgym
-```
+    ```bash
+    docker build --build-arg SRC_PATH=runpod-comfyui -t migdrp/runpod:comfyui -f runpod-comfyui/Dockerfile .
+    ```
 
-5.  **Consultar Documentación Específica**:
-    Cada carpeta de tag (ej. `runpod-fluxgym/`) contiene su propio archivo de documentación principal (ej. `runpod-fluxgym.md`) y una carpeta `docs/` (si aplica) con instrucciones detalladas sobre su uso, configuración y scripts específicos.
+3.  **Ejecutar un Contenedor (desde la raíz)**:
+    Usa volúmenes nombrados específicos por tag (ej. `comfyui_workspace`).
+    *Ejemplo para ComfyUI:*
+    ```bash
+    docker run -it --rm --name migdrp-runpod-comfyui --gpus all --env-file envs/runpod-comfyui.env -p 8188:8188 -p 8888:8888 -p 7860:7860 -v comfyui_workspace:/workspace -v ./runpod-comfyui/workspace:/workspace_template:ro migdrp/runpod:comfyui
+    ```
+
+4.  **Consultar Guías de Uso**: Para detalles sobre cómo usar los servicios de cada imagen, consulta las guías en la carpeta `docs/`.
 
 ## Licencia
 
