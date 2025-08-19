@@ -8,9 +8,10 @@ Puedes interactuar con Supervisor usando la herramienta `supervisorctl` desde un
 
 *   **Verificar estado de todos los servicios:**
     Muestra si los servicios están en ejecución (`RUNNING`), detenidos (`STOPPED`), fallaron (`FATAL`), etc.
+
     ```bash
-supervisorctl status
-```
+    supervisorctl status
+    ```
     *Salida de ejemplo:*
     ```
     jupyter                          RUNNING   pid 123, uptime 0:10:15
@@ -21,38 +22,38 @@ supervisorctl status
 *   **Ver logs de un servicio específico (últimas líneas):**
     Muestra las últimas líneas de la salida estándar (stdout) o de error (stderr) de un servicio. Útil para ver errores recientes.
     ```bash
-supervisorctl tail jupyter
-```
+    supervisorctl tail jupyter
+    ```
     ```bash
-supervisorctl tail jupyter stderr
-```
+    supervisorctl tail jupyter stderr
+    ```
 
 *   **Seguir logs de un servicio en tiempo real:**
     Muestra los logs a medida que se generan. Presiona `Ctrl+C` para detener.
     ```bash
-supervisorctl tail -f jupyter
-```
+    supervisorctl tail -f jupyter
+    ```
 
 *   **Reiniciar un servicio:**
     Detiene y vuelve a iniciar un servicio específico. Útil si un servicio parece bloqueado o quieres que recargue alguna configuración (aunque no todos los servicios recargan configuración al reiniciar).
     ```bash
-supervisorctl restart jupyter
-```
+    supervisorctl restart jupyter
+    ```
 
 *   **Detener un servicio:**
     ```bash
-supervisorctl stop jupyter
-```
+    supervisorctl stop jupyter
+    ```
 
 *   **Iniciar un servicio (que estaba detenido):**
     ```bash
-supervisorctl start jupyter
-```
+    supervisorctl start jupyter
+    ```
 
 *   **Reiniciar todos los servicios:**
     ```bash
-supervisorctl restart all
-```
+    supervisorctl restart all
+    ```
 
 ## Archivo de Configuración
 

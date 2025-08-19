@@ -1,93 +1,59 @@
-FROM python:3.10-slim
+# --- PASO 1: Usar la imagen base oficial de NVIDIA con CUDA 12.8 ---
+FROM nvidia/cuda:12.8.0-cudnn-devel-ubuntu22.04
 
 USER root
 ENV HOME=/root
-# JUPYTER_PASSWORD and HUGGINGFACE_TOKEN are set at runtime via --env-file or Runpod secrets
-# ENV JUPYTER_PASSWORD=""
-# ENV HUGGINGFACE_TOKEN=""
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Define el argumento con un valor por defecto para builds locales/contenidos
 ARG SRC_PATH=.
 
+# --- PASO 2: Instalar dependencias del sistema ---
+# Esta capa se cacheará eficientemente ya que rara vez cambia.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    wget \
-    git \
-    build-essential \
-    libgl1 \
-    libglib2.0-0 \
-    tini \
-    vim \
-    supervisor \
-    python3-venv \
-    procps \
-    net-tools \
-    lsof \
-    && pip install supervisor-stdout \
-    && rm -rf /var/lib/apt/lists/*
+    python3.10 python3.10-venv python3-pip \
+    curl wget git build-essential tini vim supervisor procps net-tools lsof \
+    libgl1 libglib2.0-0 \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# --- PASO 3: Crear, configurar y activar el entorno virtual único ---
+RUN python3.10 -m venv /opt/comfyui_env
+ENV PATH="/opt/comfyui_env/bin:$PATH"
+
+# --- PASO 4: Instalar dependencias de Python (de más estable a más volátil) ---
+# Se actualiza pip primero en su propia capa.
+RUN pip install --no-cache-dir -U pip setuptools wheel
+
+# Se instala PyTorch, la dependencia más pesada y estable. Esta capa se cacheará casi siempre.
+RUN pip install --no-cache-dir --upgrade torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+
+# Se clona ComfyUI y se instalan sus requisitos.
+RUN git clone https://github.com/comfyanonymous/ComfyUI.git /opt/ComfyUI
+RUN pip install --no-cache-dir -r /opt/ComfyUI/requirements.txt
+
+# Se pre-instala ComfyUI-Manager para simplificar el uso.
+RUN git clone https://github.com/ltdrdata/ComfyUI-Manager.git /opt/ComfyUI/custom_nodes/ComfyUI-Manager
+
+# Se instalan Jupyter y ttyd.
+RUN pip install --no-cache-dir jupyterlab terminado jupyterlab-system-monitor
 RUN wget https://github.com/tsl0922/ttyd/releases/download/1.7.3/ttyd.x86_64 -O /usr/local/bin/ttyd \
     && chmod +x /usr/local/bin/ttyd
 
-# Create JupyterLab virtual environment
-RUN python -m venv /opt/venv/jupyter && \
-    chmod -R 755 /opt/venv/jupyter && \
-    /opt/venv/jupyter/bin/pip install --no-cache-dir jupyterlab terminado jupyterlab-system-monitor
-
-# --- Inicio: Pre-instalación de ComfyUI Venv ---
-# Crear directorio para el venv pre-construido
-RUN mkdir -p /opt/comfyui_env && \
-    python -m venv /opt/comfyui_env/venv && \
-    chmod -R 755 /opt/comfyui_env
-
-# Activar venv y instalar PyTorch específico para CUDA 12.1
-RUN /bin/bash -c "source /opt/comfyui_env/venv/bin/activate && \
-    pip install --no-cache-dir torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu121"
-
-# Clonar ComfyUI temporalmente para obtener requirements.txt
-RUN mkdir -p /tmp/build_comfyui && cd /tmp/build_comfyui && \
-    git clone https://github.com/comfyanonymous/ComfyUI.git ComfyUI
-
-# Instalar dependencias usando requirements.txt y restricciones implícitas
-RUN /bin/bash -c "source /opt/comfyui_env/venv/bin/activate && \
-    echo 'torch==2.5.1+cu121' > /opt/comfyui_env/constraints.txt && \
-    echo 'torchvision==0.20.1+cu121' >> /opt/comfyui_env/constraints.txt && \
-    echo 'torchaudio==2.5.1+cu121' >> /opt/comfyui_env/constraints.txt && \
-    pip install --no-cache-dir -r /tmp/build_comfyui/ComfyUI/requirements.txt -c /opt/comfyui_env/constraints.txt"
-
-# Limpiar clonación temporal y caché de pip
-RUN rm -rf /tmp/build_comfyui && \
-    rm -rf /root/.cache/pip
-# --- Fin: Pre-instalación de ComfyUI Venv ---
-
-
-# Create necessary directories
-RUN mkdir -p /var/log/supervisor && \
-    mkdir -p /var/run && \
-    mkdir -p /opt/scripts && \
-    mkdir -p /opt/comfyui_env && \
-    mkdir -p /workspace_template && \
-    mkdir -p /workspace/models && \
-    mkdir -p /workspace/custom_nodes && \
-    chmod -R 755 /var/log/supervisor && \
-    chmod -R 777 /workspace
-
-# Copy scripts and configurations
-# Copy scripts and configurations using the build argument
+# --- PASO 5: Configuración final del contenedor ---
+# Copiamos los archivos locales al final para no invalidar la caché de los pasos anteriores.
 COPY ${SRC_PATH}/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-# Note the trailing slash on workspace/ to copy its CONTENTS
 COPY ${SRC_PATH}/workspace/ /workspace_template/
-COPY ${SRC_PATH}/workspace/ /opt/scripts/
 
-# Set script permissions
-RUN chmod -R +x /workspace_template/*.sh && \
-    chmod -R +x /opt/scripts/*.sh && \
-    mkdir -p /root/.jupyter/lab/user-settings/@jupyterlab/apputils-extension
+RUN mkdir -p /var/log/supervisor /workspace && \
+    chmod -R 755 /var/log/supervisor && \
+    chmod -R 777 /workspace && \
+    chmod -R +x /workspace_template/
+
+# Limpieza final
+RUN rm -rf /root/.cache/pip
 
 VOLUME ["/workspace"]
-
 EXPOSE 8888 7860 8188
-
 WORKDIR /
 ENTRYPOINT ["/usr/bin/tini", "--"]
-CMD ["/opt/scripts/start.sh", "supervisor"]
+CMD ["/workspace_template/start.sh", "supervisor"]

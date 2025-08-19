@@ -9,7 +9,7 @@ log() {
 # Función para configurar JupyterLab
 setup_jupyter() {
     log "Configurando JupyterLab..."
-    source /opt/venv/jupyter/bin/activate
+    source /opt/comfyui_env/bin/activate
 
     mkdir -p /root/.jupyter
 
@@ -31,34 +31,28 @@ EOL
 c.ServerApp.ip = '0.0.0.0'
 c.ServerApp.allow_root = True
 c.ServerApp.open_browser = False
-c.ServerApp.token = ''
-c.ServerApp.password = '${PASSWD_HASH}'
+c.IdentityProvider.token = ''
+c.PasswordIdentityProvider.hashed_password = '${PASSWD_HASH}'
 c.ServerApp.base_url = '/'
 c.ServerApp.root_dir = '/'
 c.ServerApp.allow_remote_access = True
 c.ServerApp.allow_origin = '*'
 c.ServerApp.allow_credentials = True
 c.ServerApp.disable_check_xsrf = True
-c.ServerApp.use_redirect_file = False
-c.ServerApp.allow_headers = ['*']
-c.ServerApp.allow_methods = ['*']
 EOL
         else
             cat > /root/.jupyter/jupyter_server_config.py << EOL
 c.ServerApp.ip = '0.0.0.0'
 c.ServerApp.allow_root = True
 c.ServerApp.open_browser = False
-c.ServerApp.token = ''
-c.ServerApp.password = ''
+c.IdentityProvider.token = ''
+c.PasswordIdentityProvider.hashed_password = ''
 c.ServerApp.base_url = '/'
 c.ServerApp.root_dir = '/'
 c.ServerApp.allow_remote_access = True
 c.ServerApp.allow_origin = '*'
 c.ServerApp.allow_credentials = True
 c.ServerApp.disable_check_xsrf = True
-c.ServerApp.use_redirect_file = False
-c.ServerApp.allow_headers = ['*']
-c.ServerApp.allow_methods = ['*']
 EOL
             log "ADVERTENCIA: No se ha establecido JUPYTER_PASSWORD, usando contraseña vacía"
         fi
@@ -70,7 +64,7 @@ EOL
 # Función para iniciar JupyterLab
 start_jupyter() {
     log "Iniciando JupyterLab..."
-    source /opt/venv/jupyter/bin/activate
+    source /opt/comfyui_env/bin/activate
     
     # Verificar si el puerto está en uso
     if lsof -Pi :8888 -sTCP:LISTEN -t >/dev/null ; then
@@ -80,9 +74,8 @@ start_jupyter() {
     fi
 
     cd /
-    exec jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root \
-        --NotebookApp.allow_origin='*' \
-        --NotebookApp.allow_credentials=True
+    # El servidor usará automáticamente el archivo de configuración que creamos
+    exec jupyter lab
 }
 
 # Función para limpiar al salir
