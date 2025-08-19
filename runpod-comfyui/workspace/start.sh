@@ -67,17 +67,12 @@ setup_workspace() {
     log "Setting up workspace..."
 
     if [ -d "/workspace_template" ]; then
-        log "Checking for missing scripts in /workspace to copy from /workspace_template..."
-        # Copy files from /workspace_template to /workspace only if they don't exist in /workspace
-        find /workspace_template -maxdepth 1 -type f -print0 | while IFS= read -r -d $'\0' file; do
-            basename=$(basename "$file")
-            if [ ! -e "/workspace/$basename" ]; then
-                log "Copying initial script: $basename to /workspace/"
-                cp "$file" "/workspace/"
-                chmod 777 "/workspace/$basename" # Ensure script is executable in volume
-            fi
-        done
-        # Note: We DO NOT remove /workspace_template as it's mounted read-only
+        log "Checking for missing scripts and directories in /workspace to copy from /workspace_template..."
+        # Use cp with -r (recursive) and -n (no-clobber) to copy everything
+        # that doesn't already exist in the destination.
+        cp -r -n /workspace_template/* /workspace/
+        # Ensure permissions are correct on the copied content
+        chmod -R 777 /workspace || true
     else
         log_warning "/workspace_template directory not found. Cannot copy initial scripts."
     fi

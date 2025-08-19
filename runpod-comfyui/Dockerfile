@@ -6,12 +6,15 @@ ENV HOME=/root
 # ENV JUPYTER_PASSWORD=""
 # ENV HUGGINGFACE_TOKEN=""
 
+# Define el argumento con un valor por defecto para builds locales/contenidos
+ARG SRC_PATH=.
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     wget \
     git \
     build-essential \
-    libgl1-mesa-glx \
+    libgl1 \
     libglib2.0-0 \
     tini \
     vim \
@@ -70,9 +73,11 @@ RUN mkdir -p /var/log/supervisor && \
     chmod -R 777 /workspace
 
 # Copy scripts and configurations
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY workspace/* /workspace_template/
-COPY workspace/* /opt/scripts/
+# Copy scripts and configurations using the build argument
+COPY ${SRC_PATH}/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+# Note the trailing slash on workspace/ to copy its CONTENTS
+COPY ${SRC_PATH}/workspace/ /workspace_template/
+COPY ${SRC_PATH}/workspace/ /opt/scripts/
 
 # Set script permissions
 RUN chmod -R +x /workspace_template/*.sh && \

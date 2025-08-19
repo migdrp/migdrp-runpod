@@ -34,6 +34,24 @@ cd /workspace/ComfyUI/custom_nodes && git clone https://github.com/ltdrdata/Comf
 ```
 2. Accede a ComfyUI ([http://localhost:8188](http://localhost:8188)) y busca el nodo "Manager" para instalar modelos y extensiones.
 
+### 3. Instalar Configuraciones de Modelos (Model Setups)
+
+Para facilitar la configuración de entornos para modelos específicos (como Wan Video 2.2), puedes usar los scripts proporcionados en el directorio `/workspace/model_setups`.
+
+1.  **Accede a una terminal** (vía JupyterLab o la Terminal Web en el puerto `7860`).
+2.  **Lista los scripts disponibles**:
+    ```bash
+    ls /workspace/model_setups
+    ```
+3.  **Ejecuta el script deseado**. Por ejemplo, para instalar todo lo necesario para Wan Video 2.2:
+    ```bash
+    bash /workspace/model_setups/install_wan_video_2.2.sh
+    ```
+4.  **Sigue las instrucciones del script**. Generalmente, esto implicará:
+    *   Esperar a que se descarguen todos los modelos.
+    *   Reiniciar ComfyUI: `supervisorctl restart comfyui`.
+    *   Abrir la interfaz de ComfyUI, cargar un workflow, y usar el **ComfyUI-Manager** para instalar cualquier nodo personalizado que falte.
+
 ## Estructura de Carpetas Recomendada
 
 Para mantener los modelos organizados en ComfyUI, se recomienda la siguiente estructura de carpetas:
