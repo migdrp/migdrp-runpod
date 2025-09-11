@@ -9,8 +9,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 ARG SRC_PATH=.
 
 # --- PASO 2: Instalar dependencias del sistema ---
+# Se añade python3.10-dev para tener los headers de Python necesarios para compilar Triton.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3.10 python3.10-venv python3-pip \
+    python3.10 python3.10-venv python3-pip python3.10-dev \
     curl wget git build-essential tini vim supervisor procps net-tools lsof rsync \
     libgl1 libglib2.0-0 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -29,8 +30,8 @@ RUN /opt/venv_comfyui/bin/pip install --no-cache-dir --upgrade torch torchvision
 # Se clona ComfyUI y se instalan sus requisitos.
 RUN git clone https://github.com/comfyanonymous/ComfyUI.git /opt/ComfyUI
 RUN /opt/venv_comfyui/bin/pip install --no-cache-dir -r /opt/ComfyUI/requirements.txt
-# Se instalan dependencias adicionales para nodos personalizados.
-RUN /opt/venv_comfyui/bin/pip install --no-cache-dir uv GitPython gguf
+# Se instalan dependencias adicionales para nodos personalizados, incluyendo sage-attention.
+RUN /opt/venv_comfyui/bin/pip install --no-cache-dir uv GitPython gguf sageattention
 # Se pre-instala ComfyUI-Manager.
 RUN git clone https://github.com/ltdrdata/ComfyUI-Manager.git /opt/ComfyUI/custom_nodes/ComfyUI-Manager
 
